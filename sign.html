@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PhantomNet - Secure Access</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Firebase App (the core Firebase SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <!-- Firebase Authentication -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <!-- Tailwind CSS for styling (optional) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <!-- Navigation / Header -->
+  <header class="bg-gray-900 text-white p-4 shadow-lg">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold">PhantomNet</h1>
+      <nav>
+        <a href="#about" class="px-3 hover:text-red-500">About</a>
+        <a href="#events" class="px-3 hover:text-red-500">Events</a>
+        <a href="#community" class="px-3 hover:text-red-500">Community</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto p-4">
+    <!-- Sign In / Protected Content -->
+    <div id="auth-section" class="text-center mt-10">
+      <!-- Sign In Button (Visible when user is not authenticated) -->
+      <button id="google-signin" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-700 transition">
+        Sign In with Google
+      </button>
+
+      <!-- Protected Content (Visible when user is authenticated) -->
+      <div id="protected-content" class="hidden mt-6">
+        <p class="text-xl">Welcome, <span id="user-name" class="font-bold"></span>!</p>
+        <p class="mt-2">Only authenticated users can see this data.</p>
+        <!-- You can add more protected data or dashboard components here -->
+        <button id="signout" class="mt-4 bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600 transition">
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Firebase & Auth Logic -->
+  <script>
+    // Replace the following config with your Firebase project configuration
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY_HERE",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Reference DOM elements
+    const googleSignInButton = document.getElementById('google-signin');
+    const protectedContent = document.getElementById('protected-content');
+    const userNameSpan = document.getElementById('user-name');
+    const signOutButton = document.getElementById('signout');
+
+    // Set up Google Sign-In provider
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    // Sign In Function
+    googleSignInButton.addEventListener('click', () => {
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          // The signed-in user info.
+          const user = result.user;
+          userNameSpan.textContent = user.displayName;
+          protectedContent.classList.remove('hidden');
+          googleSignInButton.classList.add('hidden');
+        })
+        .catch((error) => {
+          console.error("Error during sign in:", error);
+        });
+    });
+
+    // Sign Out Function
+    signOutButton.addEventListener('click', () => {
+      auth.signOut().then(() => {
+        protectedContent.classList.add('hidden');
+        googleSignInButton.classList.remove('hidden');
+      }).catch((error) => {
+        console.error("Error during sign out:", error);
+      });
+    });
+
+    // Optional: Automatically detect auth state changes
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        // User is signed in.
+        userNameSpan.textContent = user.displayName;
+        protectedContent.classList.remove('hidden');
+        googleSignInButton.classList.add('hidden');
+      } else {
+        // User is signed out.
+        protectedContent.classList.add('hidden');
+        googleSignInButton.classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
